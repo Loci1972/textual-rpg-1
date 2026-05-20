@@ -5,7 +5,7 @@
 #include "tools.h"
 #include <ctime>
 #include <array>
-
+#include <vector>
 
 Game::Game(Player& p, Enemy& e)
     : combatState(RUNNING), isRunning(true), rewarded(false),
@@ -167,18 +167,40 @@ void Game::shop(){
     std::cout << "coming soon..." << std::endl;
 }
 
-void Game::generateEnemy(){
+Enemy Game::generateEnemy(){
     int playerLevel = player->getLevel();
-	constexpr int default_lenght = 5;
+	constexpr int default_lenght = 6;
 	int index;
 std::array<Enemy,default_lenght> Enemies = {
-		Enemy("Dragon",playerLevel+randomInt(2,6)),
-		Enemy("Spider", playerLevel+randomInt(1,3)),
-		Enemy("Goblin", playerLevel+randomInt(2,3)),
-		Enemy("Skeleton", playerLevel+1),
-		Enemy("Zombie", playerLevel+randomInt(2,4))
+		Enemy("Dragon",playerLevel+3),
+		Enemy("Spider", playerLevel+1),
+		Enemy("Goblin", playerLevel+1),
+		Enemy("Skeleton", playerLevel),
+		Enemy("Zombie", playerLevel+1),
+        Enemy("mouton",playerLevel+1),
 	};
 	index = randomInt(0,default_lenght-1);
     *enemy = Enemies[index];
     enemy -> addDefense(-3);
+}
+
+void Game::generateWaves(){
+    std::vector<Enemy> enemies;
+    size_t input = 0;
+    while (10){
+        enemies.push_back(generateEnemy());
+    }
+    size_t size = enemies.size();
+    while (true){
+        for (size_t i = 0; (size_t) i < enemies.size(); i++){
+            std::cout << i << "|" << enemies[input].getName() << std::endl;
+        }    
+    }
+    std::cout << "select the first monster :" << std::endl;
+    while (true){
+        input = (size_t)getNumber();
+        if (input >= 1 && input <= size){
+            combat();
+        }
+    }
 }

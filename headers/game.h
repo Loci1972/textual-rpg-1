@@ -20,7 +20,8 @@ class Game{
 		Enemy* enemy;
 	public:
 		Game(Player& p, Enemy& e);
-		void generateEnemy();
+		Enemy generateEnemy();
+		void generateWaves();
 		void saveGame();
 		void loadGame();
 		int choices();

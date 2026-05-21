@@ -7,7 +7,6 @@ int main() {
     Enemy enemy ("",1);
     Player hero("");
     Game game(hero,enemy);
-    game.generateWaves();
     game.loadGame();
     game.generateEnemy();
     game.combat();

@@ -111,7 +111,7 @@ bool Game::actions (){
             }
         return true;
     } 
-    // Cas 2, 3 ou 4 : Le combat est fini (Mort, Victoire ou Fuite)
+    // Cas 3, 4 ou 5 : Le combat est fini (Mort, Victoire ou Fuite)
     else {
         switch (choice) {
             case 1: // Restart / Continue
@@ -134,20 +134,20 @@ bool Game::actions (){
 
 void Game::combat(){
     while (isRunning) {
-        if (combatState != FLED){
+        if (combatState != FLED && combatState != LAUNCHED){
             // --- 1. SET THE STATE AND MENU TYPE ---
             if (player->isAlive() && enemy->isAlive()){
-                menueType = 1; // Combat menu
+                menueType = 2; // Combat menu
                 combatState = RUNNING;
             } else if (!player->isAlive()) {
-                menueType = 2; // Death menu
+                menueType = 3; // Death menu
                 combatState = DEAD;
             }else if (player->isAlive() && !enemy->isAlive()){
-                menueType = 3; // Victory menu
+                menueType = 4; // Victory menu
                 combatState = WON;
             }
         }else {
-            menueType = 4; // Flee menu
+            menueType = 5; // Flee menu
         }
         if (combatState == WON && !rewarded){
             player->addGold(enemy->getGoldReward());
@@ -158,7 +158,7 @@ void Game::combat(){
         if (playerTurn) {
             // Get the choice based on the current menu
             choice = choices();
-            if (menueType == 1 && choice == 2) {
+            if (menueType == 2 && choice == 2) {
                 combatState = (player->runAway(randomState(), true) ? FLED : RUNNING);
                 if (combatState != FLED) playerTurn = false; // Failed flee = Enemy hits you
             } else {
@@ -166,12 +166,12 @@ void Game::combat(){
                 isRunning = actions();
                 
                 // If we chose "Restart" (Choice 1) in a non-combat menu
-                if (menueType != 1 && choice == 1) {
+                if (menueType != 1 || menueType != 2 && choice == 1) {
                     generateEnemy();
                     combatState = RUNNING;
                     rewarded = false;
                 }
-                if (menueType == 2 && choice == 2){
+                if (menueType == 3 && choice == 2){
                     generateEnemy();
                 }
         }
@@ -242,7 +242,7 @@ void Game::combatWaves(std::vector<Enemy> enemies){
                 if (input == 1){
                     *enemy = enemies[selectedEnemy];
                     combat();
-                }if (input == 2){
+                }else if (input == 2){
                     std::cout << "select the first monster :" << std::endl;
                 }
             }

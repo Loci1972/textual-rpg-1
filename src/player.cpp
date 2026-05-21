@@ -231,7 +231,7 @@ bool Player::loadFromJSON(const std::string& filename) {
 }
 
 void Player::addItem(Item item) {
-    inventory.push_back(item); // Corrigé "iventory"
+    inventory.push_back(item);
 }
 
 void Player::useItem(int index) {

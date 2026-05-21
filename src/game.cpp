@@ -75,7 +75,7 @@ bool Game::actions (){
                 combatState = RUNNING;
                 break;
             case 2:
-                combatWaves(generateWaves());
+                combatWaves();
                 break;
             case 3: // Stats
                 player->displayStats();
@@ -132,7 +132,7 @@ bool Game::actions (){
     return true;
 }
 
-void Game::combat(){
+void Game::combat(bool invoked){
     while (isRunning) {
         if (combatState != FLED && combatState != LAUNCHED){
             // --- 1. SET THE STATE AND MENU TYPE ---
@@ -142,17 +142,21 @@ void Game::combat(){
             } else if (!player->isAlive()) {
                 menueType = 3; // Death menu
                 combatState = DEAD;
+                if (invoked) isRunning = false;
             }else if (player->isAlive() && !enemy->isAlive()){
                 menueType = 4; // Victory menu
                 combatState = WON;
+                if (invoked) isRunning = false;
             }
         }else {
             menueType = 5; // Flee menu
+            if (invoked) isRunning = false;
         }
         if (combatState == WON && !rewarded){
             player->addGold(enemy->getGoldReward());
             player->addXp(enemy->getXpReward());
             rewarded = true;
+            if (invoked) isRunning = false;
         }
         // --- 2. PLAYER OR ENEMY TURN ---
         if (playerTurn) {
@@ -166,7 +170,7 @@ void Game::combat(){
                 isRunning = actions();
                 
                 // If we chose "Restart" (Choice 1) in a non-combat menu
-                if (menueType != 1 || menueType != 2 && choice == 1) {
+                if ((menueType != 1 || menueType != 2) && choice == 1) {
                     generateEnemy();
                     combatState = RUNNING;
                     rewarded = false;
@@ -220,32 +224,45 @@ std::vector<Enemy> Game::generateWaves(){
     return enemies;
 }
 
-void Game::combatWaves(std::vector<Enemy> enemies){
-    size_t size = enemies.size();
-    int input = 0;
-    int selectedEnemy = 0;
-    while (true){
-        for (size_t i = 0; (size_t) i < enemies.size(); i++){
-            std::cout << i+1 << "|" << enemies[i].getName() << std::endl;
+void Game::combatWaves(){
+    std::vector<Enemy> enemies = generateWaves();
+    size_t selectedEnemy = 0;
+    
+    while (!enemies.empty() && player->isAlive()) {
+        // Afficher la liste
+        std::cout << "\n=== WAVE - Remaining enemies: " << enemies.size() << " ===\n";
+        for (size_t i = 0; i < enemies.size(); i++){
+            std::cout << i+1 << "| " << enemies[i].getName() << std::endl;
         }
-        break;  
-    }
-    std::cout << "select the first monster :" << std::endl;
-    while (true){
-        input = (size_t)getNumber();
-        if ((input) >= 1 && (input) <= size){
+        
+        std::cout << "Select an enemy (or 0 to go back): ";
+        size_t input = (size_t)getNumber();
+        
+        if (input == 0) break; // Quitter la vague
+        
+        if (input >= 1 && input <= enemies.size()){
             selectedEnemy = input - 1;
             enemies[selectedEnemy].displayStats();
-            std::cout << "This is your enemy. What's next ?\n 1.fight\n2.go back" << std::endl;
+            std::cout << "Fight this enemy? 1.Yes  2.No\n ? : ";
             input = getNumber();
-            if (input >= 1 && input <= 2){
-                if (input == 1){
-                    *enemy = enemies[selectedEnemy];
-                    combat();
-                }else if (input == 2){
-                    std::cout << "select the first monster :" << std::endl;
+            
+            if (input == 1){
+                *enemy = enemies[selectedEnemy];
+                combatState = RUNNING;
+                rewarded = false;
+                combat(true);
+                
+                // Si ennemi vaincu, le retirer de la liste
+                if (!enemy->isAlive()) {
+                    enemies.erase(enemies.begin() + selectedEnemy);
+                    std::cout << "Enemy defeated! Next...\n";
                 }
             }
         }
     }
+    
+    if (enemies.empty()) {
+        std::cout << "\n🎉 Wave completed!\n";
+    }
+    combatState = LAUNCHED;
 }

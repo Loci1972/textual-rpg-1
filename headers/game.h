@@ -23,12 +23,12 @@ class Game{
 		Game(Player& p, Enemy& e);
 		Enemy generateEnemy();
 		std::vector<Enemy> generateWaves();
-		void combatWaves(std::vector<Enemy> enemies);
+		void combatWaves();
 		void saveGame();
 		void loadGame();
 		int choices();
 		bool actions();
-		void combat();
+		void combat(bool invoked);
 		void shop();
 };
 

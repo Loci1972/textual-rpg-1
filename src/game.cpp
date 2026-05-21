@@ -148,7 +148,7 @@ void Game::combat(bool invoked){
                 combatState = WON;
                 if (invoked) isRunning = false;
             }
-        }else {
+        }else if (combatState == FLED){
             menueType = 5; // Flee menu
             if (invoked) isRunning = false;
         }
@@ -250,6 +250,7 @@ void Game::combatWaves(){
                 *enemy = enemies[selectedEnemy];
                 combatState = RUNNING;
                 rewarded = false;
+                isRunning = true;
                 combat(true);
                 
                 // Si ennemi vaincu, le retirer de la liste
@@ -257,6 +258,8 @@ void Game::combatWaves(){
                     enemies.erase(enemies.begin() + selectedEnemy);
                     std::cout << "Enemy defeated! Next...\n";
                 }
+                combatState = LAUNCHED;
+                isRunning = true;  
             }
         }
     }
@@ -264,5 +267,5 @@ void Game::combatWaves(){
     if (enemies.empty()) {
         std::cout << "\n🎉 Wave completed!\n";
     }
-    combatState = LAUNCHED;
+    combatState = WON;
 }

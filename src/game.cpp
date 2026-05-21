@@ -170,7 +170,7 @@ void Game::combat(bool invoked){
                 isRunning = actions();
                 
                 // If we chose "Restart" (Choice 1) in a non-combat menu
-                if ((menueType != 1 || menueType != 2) && choice == 1) {
+                if ((menueType != 1 && menueType != 2) && choice == 1) {
                     generateEnemy();
                     combatState = RUNNING;
                     rewarded = false;

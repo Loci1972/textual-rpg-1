@@ -9,7 +9,7 @@ int main() {
     Game game(hero,enemy);
     game.loadGame();
     game.generateEnemy();
-    game.combat();
+    game.combat(false);
     std::cout << "Thanks for playing!" << std::endl;
     return 0;
 }

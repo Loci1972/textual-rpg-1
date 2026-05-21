@@ -13,11 +13,11 @@ Game::Game(Player& p, Enemy& e)
       player(&p), enemy(&e) {
 }
 void Game::saveGame(){
-    player->saveToFile("save.txt");
+    player->saveToJSON("save.json");
 }
 
 void Game::loadGame(){
-    if (player->loadFromFile("save.txt")) {
+    if (player->loadFromJSON("save.json")) {
         std::cout << "Welcome back, " << player->getName() << "!\n";
     } else {
         std::cout << "New adventure! Enter your name: ";
@@ -69,14 +69,13 @@ int Game::choices(){
 }
 
 bool Game::actions (){
-    // Cas 1 : Le combat est en cours
     if (menueType == 1) {
         switch (choice) {
             case 1:
                 combatState = RUNNING;
                 break;
             case 2:
-
+                combatWaves(generateWaves());
                 break;
             case 3: // Stats
                 player->displayStats();
@@ -242,6 +241,7 @@ void Game::combatWaves(std::vector<Enemy> enemies){
             if (input >= 1 && input <= 2){
                 if (input == 1){
                     *enemy = enemies[selectedEnemy];
+                    combat();
                 }if (input == 2){
                     std::cout << "select the first monster :" << std::endl;
                 }

@@ -3,7 +3,10 @@
 #include <string>
 #include <numeric>
 #include "enemy.h"
-#include <fstream> // Nécessaire pour la gestion des fichiers
+#include <fstream>
+#include "../include/json.hpp"
+
+using json = nlohmann::json;
 
 Player::Player(std::string playerName){
     name = playerName;
@@ -135,6 +138,96 @@ bool Player::loadFromFile(const std::string& filename) {
         return true;
     }
     return false; // Le fichier n'existe pas encore
+}
+
+void Player::saveToJSON(const std::string& filename) {
+    try {
+        json playerData;
+        
+        // Sauvegarder les stats du joueur
+        playerData["character"]["name"] = name;
+        playerData["character"]["level"] = level;
+        playerData["character"]["xp"] = xp;
+        playerData["character"]["xpToNextLevel"] = xpToNextLevel;
+        
+        // Sauvegarder la santé
+        playerData["stats"]["maxHp"] = maxHp;
+        playerData["stats"]["currentHp"] = hp;
+        playerData["stats"]["attack"] = attack;
+        playerData["stats"]["defense"] = defense;
+        
+        // Sauvegarder l'or
+        playerData["resources"]["gold"] = gold;
+        
+        // Sauvegarder l'inventaire
+        json inventoryArray = json::array();
+        for (const auto& item : inventory) {
+            json itemJson;
+            itemJson["name"] = item.getName();
+            itemJson["healAmount"] = item.healPoints();
+            inventoryArray.push_back(itemJson);
+        }
+        playerData["inventory"] = inventoryArray;
+        
+        // Ajouter des métadonnées
+        playerData["metadata"]["version"] = "1.0";
+        playerData["metadata"]["savedAt"] = "Game Save";
+        
+        // Écrire dans le fichier avec indentation
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            file << playerData.dump(4); // dump(4) = indentation de 4 espaces
+            file.close();
+            std::cout << "✅ Partie sauvegardée avec succès en JSON !\n";
+        } else {
+            std::cerr << "❌ Erreur : Impossible d'ouvrir le fichier de sauvegarde JSON.\n";
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "❌ Erreur lors de la sauvegarde JSON : " << e.what() << "\n";
+    }
+}
+
+bool Player::loadFromJSON(const std::string& filename) {
+    try {
+        std::ifstream file(filename);
+        if (file.is_open()) {
+            json playerData;
+            file >> playerData;
+            file.close();
+            
+            // Charger les stats du joueur
+            name = playerData["character"]["name"];
+            level = playerData["character"]["level"];
+            xp = playerData["character"]["xp"];
+            xpToNextLevel = playerData["character"]["xpToNextLevel"];
+            
+            // Charger la santé
+            maxHp = playerData["stats"]["maxHp"];
+            hp = playerData["stats"]["currentHp"];
+            attack = playerData["stats"]["attack"];
+            defense = playerData["stats"]["defense"];
+            
+            // Charger l'or
+            gold = playerData["resources"]["gold"];
+            
+            // Charger l'inventaire
+            inventory.clear();
+            if (playerData.contains("inventory") && playerData["inventory"].is_array()) {
+                for (const auto& itemJson : playerData["inventory"]) {
+                    std::string itemName = itemJson["name"];
+                    int healAmount = itemJson["healAmount"];
+                    inventory.emplace_back(itemName, healAmount);
+                }
+            }
+            
+            std::cout << "✅ Partie chargée avec succès depuis JSON !\n";
+            return true;
+        }
+        return false;
+    } catch (const std::exception& e) {
+        std::cerr << "❌ Erreur lors du chargement JSON : " << e.what() << "\n";
+        return false;
+    }
 }
 
 void Player::addItem(Item item) {

@@ -16,6 +16,8 @@ class Player{
         Player(std::string PlayerName);
         void saveToFile(const std::string& filename);
         bool loadFromFile(const std::string& filename);
+        void saveToJSON(const std::string& filename);
+        bool loadFromJSON(const std::string& filename);
         //getters
         int getAttack() const { return attack; }
         int getMaxHp() const {return maxHp;}

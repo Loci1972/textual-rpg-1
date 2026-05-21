@@ -9,7 +9,7 @@ class Item{
 		int healAmount;
 	public:
 		Item(std::string itemName, int hPoint);
-		int healPoints (){return healAmount;}
-		std::string getName(){return name;}
+		int healPoints() const {return healAmount;}
+		std::string getName() const {return name;}
 };
 #endif

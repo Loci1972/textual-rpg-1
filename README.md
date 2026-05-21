@@ -159,4 +159,4 @@ Laurent
 
 -----
 
-*Coded on an iPhone with a-shell. Yes, really.*
+*Coded on an iPhone with a-shell. Yes, really. (now on my computer)*

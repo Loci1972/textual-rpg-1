@@ -29,6 +29,7 @@ class Game{
 		int choices();
 		bool actions();
 		void combat(bool invoked);
+		void stateManager(bool invoked);
 		void shop();
 };
 

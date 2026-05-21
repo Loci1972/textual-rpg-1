@@ -134,30 +134,7 @@ bool Game::actions (){
 
 void Game::combat(bool invoked){
     while (isRunning) {
-        if (combatState != FLED && combatState != LAUNCHED){
-            // --- 1. SET THE STATE AND MENU TYPE ---
-            if (player->isAlive() && enemy->isAlive()){
-                menueType = 2; // Combat menu
-                combatState = RUNNING;
-            } else if (!player->isAlive()) {
-                menueType = 3; // Death menu
-                combatState = DEAD;
-                if (invoked) isRunning = false;
-            }else if (player->isAlive() && !enemy->isAlive()){
-                menueType = 4; // Victory menu
-                combatState = WON;
-                if (invoked) isRunning = false;
-            }
-        }else if (combatState == FLED){
-            menueType = 5; // Flee menu
-            if (invoked) isRunning = false;
-        }
-        if (combatState == WON && !rewarded){
-            player->addGold(enemy->getGoldReward());
-            player->addXp(enemy->getXpReward());
-            rewarded = true;
-            if (invoked) isRunning = false;
-        }
+        stateManager(invoked);
         // --- 2. PLAYER OR ENEMY TURN ---
         if (playerTurn) {
             // Get the choice based on the current menu
@@ -191,6 +168,32 @@ std::cout << enemy->getName() << " deals " << dmg << " damage!\n";
         }
     }
 	
+}
+
+void Game::stateManager(bool invoked){
+    if (combatState != FLED && combatState != LAUNCHED){
+    // --- 1. SET THE STATE AND MENU TYPE ---
+    if (player->isAlive() && enemy->isAlive()){
+        menueType = 2; // Combat menu
+        combatState = RUNNING;
+    } else if (!player->isAlive()) {
+        menueType = 3; // Death menu
+        combatState = DEAD;
+        if (invoked) isRunning = false;
+    }else if (player->isAlive() && !enemy->isAlive()){
+        menueType = 4; // Victory menu
+        combatState = WON;
+        if (invoked) isRunning = false;
+    }
+    }else if (combatState == FLED){
+        menueType = 5; // Flee menu
+        if (invoked) isRunning = false;
+    }if (combatState == WON && !rewarded){
+        player->addGold(enemy->getGoldReward());
+        player->addXp(enemy->getXpReward());
+        rewarded = true;
+        if (invoked) isRunning = false;
+    }
 }
 
 void Game::shop(){

@@ -8,7 +8,7 @@
 #include <vector>
 
 Game::Game(Player& p, Enemy& e)
-    : combatState(RUNNING), isRunning(true), rewarded(false),
+    : combatState(LAUNCHED), isRunning(true), rewarded(false),
       playerTurn(true), menueType(1), choice(0), itemChoice(0),
       player(&p), enemy(&e) {
 }
@@ -28,25 +28,32 @@ void Game::loadGame(){
 int Game::choices(){
     int a;
     while (true){
-        if (combatState == RUNNING){
+        if (combatState == LAUNCHED){
             std::cout << " <<<MENUE>>> " << std::endl;
-            std::cout << " 1. Attack\n 2. Run away\n 3. Stats\n 4. Items\n" ;
+            std::cout << " 1. fight enemy\n 2. fight wave\n 3. Stats\n 4. Items\n";
             a = getNumber();
             if (a >= 1 && a <= 4) return a;
             menueType = 1;
+            std::cout << "Invalid choice !!" << std::endl;
+        }else if (combatState == RUNNING){
+            std::cout << " <<<In combat>>> " << std::endl;
+            std::cout << " 1. Attack\n 2. Run away\n 3. Stats\n 4. Items\n" ;
+            a = getNumber();
+            if (a >= 1 && a <= 4) return a;
+            menueType = 2;
             std::cout << "Invalid choice !!" << std::endl;
         }else if (combatState == DEAD){
             std::cout << " <<<You Lose...>>> " << std::endl;
             std::cout << " 1. Retry\n 2. quit\n 3. Stats\n" ;
             a = getNumber();
-            menueType = 2;
+            menueType = 3;
             if (a >= 1 && a <= 3) return a;
             std::cout << "Invalid choice !!" << std::endl;
         }else if (combatState == FLED){
             std::cout << " <<<You Ran Away 🐔...>>> " << std::endl;
             std::cout << " 1. New fight\n 2. quit\n 3. Stats\n" ;
             a = getNumber();
-            menueType = 3;
+            menueType = 4;
             if (a >= 1 && a <= 3) return a;
             std::cout << "Invalid choice !!" << std::endl;  
         }
@@ -54,7 +61,7 @@ int Game::choices(){
             std::cout << " <<<YOU WON !!!...>>> " << std::endl;
             std::cout << " 1. New fight\n 2. quit\n 3. Stats\n" ;
             a = getNumber();
-            menueType = 4;
+            menueType = 5;
             if (a >= 1 && a <= 3) return a;
             std::cout << "Invalid choice !!" << std::endl;
         }
@@ -64,6 +71,26 @@ int Game::choices(){
 bool Game::actions (){
     // Cas 1 : Le combat est en cours
     if (menueType == 1) {
+        switch (choice) {
+            case 1:
+                combatState = RUNNING;
+                break;
+            case 2:
+
+                break;
+            case 3: // Stats
+                player->displayStats();
+                break;
+            case 4: // Items
+                player->showItems();
+                std::cout << "<<ITEMS>> \n 1. Use item\n 2. Cancel\n ? : ";
+                itemChoice = getNumber();
+                if (itemChoice == 1) player->useItem(getNumber());
+                if (itemChoice == 2) std::cout << "canceled" << std::endl;
+                break;
+            }
+        return true;
+    } else if (menueType == 2) {
         switch (choice) {
             case 1:// Attack
         std::cout << "You hit " << enemy->getName() << " with " << enemy->takeDamage(player->getAttack()) << " Damages.\n";
@@ -182,25 +209,43 @@ std::array<Enemy,default_lenght> Enemies = {
 	index = randomInt(0,default_lenght-1);
     *enemy = Enemies[index];
     enemy -> addDefense(-3);
+    return Enemy(*enemy);
 }
 
-void Game::generateWaves(){
+std::vector<Enemy> Game::generateWaves(){
     std::vector<Enemy> enemies;
-    size_t input = 0;
-    while (10){
+    int waveSize = 10;
+    for (int i = 0; i < waveSize ; i++){
         enemies.push_back(generateEnemy());
     }
+    return enemies;
+}
+
+void Game::combatWaves(std::vector<Enemy> enemies){
     size_t size = enemies.size();
+    int input = 0;
+    int selectedEnemy = 0;
     while (true){
         for (size_t i = 0; (size_t) i < enemies.size(); i++){
-            std::cout << i << "|" << enemies[input].getName() << std::endl;
-        }    
+            std::cout << i+1 << "|" << enemies[i].getName() << std::endl;
+        }
+        break;  
     }
     std::cout << "select the first monster :" << std::endl;
     while (true){
         input = (size_t)getNumber();
-        if (input >= 1 && input <= size){
-            combat();
+        if ((input) >= 1 && (input) <= size){
+            selectedEnemy = input - 1;
+            enemies[selectedEnemy].displayStats();
+            std::cout << "This is your enemy. What's next ?\n 1.fight\n2.go back" << std::endl;
+            input = getNumber();
+            if (input >= 1 && input <= 2){
+                if (input == 1){
+                    *enemy = enemies[selectedEnemy];
+                }if (input == 2){
+                    std::cout << "select the first monster :" << std::endl;
+                }
+            }
         }
     }
 }

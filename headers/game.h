@@ -3,9 +3,10 @@
 
 #include "enemy.h"
 #include "player.h"
-
+#include <array>
 enum gameState{
-    RUNNING,
+    LAUNCHED,
+	RUNNING,
     FLED,
     WON,
     DEAD,
@@ -21,7 +22,8 @@ class Game{
 	public:
 		Game(Player& p, Enemy& e);
 		Enemy generateEnemy();
-		void generateWaves();
+		std::vector<Enemy> generateWaves();
+		void combatWaves(std::vector<Enemy> enemies);
 		void saveGame();
 		void loadGame();
 		int choices();

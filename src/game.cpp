@@ -96,9 +96,8 @@ bool Game::handleEndMenue(){
             std::cout << "Restarting...\n";
             break;
         case 2: // Quit
-		    player->heal(player->getMaxHp());
-            saveGame();
-            return false;
+            combatState = INMENUE;   // ✅ on revient au menu
+            break;
         case 3: // Stats
             player->displayStats();
             break;

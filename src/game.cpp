@@ -95,8 +95,9 @@ bool Game::handleEndMenue(){
             playerTurn = true;
             std::cout << "Restarting...\n";
             break;
-        case 2: // Quit
-            combatState = INMENUE;   // ✅ on revient au menu
+        case 2:
+            combatState = INMENUE;
+            menueType = 1;
             break;
         case 3: // Stats
             player->displayStats();
@@ -140,6 +141,7 @@ bool Game::actions (){
         case 4:
         case 5:
             return handleEndMenue();
+            break;
         default:
             return true;
             break;
@@ -258,6 +260,7 @@ void Game::combatWaves(){
         
         if (input == 0){
             combatState = INMENUE;
+            menueType = 1;
             break;
         }
         
@@ -280,13 +283,13 @@ void Game::combatWaves(){
                     std::cout << "Enemy defeated! Next...\n";
                 }
                 combatState = INMENUE;
-                isRunning = true;  
+                menueType = 1;  
             }
         }
     }
     
     if (enemies.empty()) {
         std::cout << "\n🎉 Wave completed!\n";
+        combatState = INMENUE;
     }
-    combatState = WON;
 }

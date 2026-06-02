@@ -292,11 +292,11 @@ std::array<Enemy,default_lenght> Enemies = {
 		Enemy("Goblin", playerLevel+1),
 		Enemy("Skeleton", playerLevel),
 		Enemy("Zombie", playerLevel+1),
-        Enemy("mouton",playerLevel+1),
+        Enemy("Slime",playerLevel+1),
 	};
 	index = randomInt(0,default_lenght-1);
     *enemy = Enemies[index];
-    enemy -> addDefense(-3);
+    enemy -> addDefense(-1);
     return Enemy(*enemy);
 }
 

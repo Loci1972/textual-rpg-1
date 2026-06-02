@@ -8,9 +8,9 @@ Enemy::Enemy(std::string playerName, int level_add){
     level = level_add;
     xp = 0;
     xpReward = 50 + level;
-    maxHp = 120 +(level_add-1)*3;
+    maxHp = 120 +(level_add-2)*3;
     hp = maxHp;
-    attack = 16 + (level_add-1)*3;
+    attack = 16 + (level_add)*3;
     defense = (level_add-1)*2;
     goldReward = 50+level ;
 }

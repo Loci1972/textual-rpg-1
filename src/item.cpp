@@ -1,8 +1,9 @@
-#include <string>
 #include "item.h"
-#include <iostream>
 
-Item::Item(std::string itemName, int hPoint){
-	name = itemName;
-	healAmount = hPoint;
+// Il faut que la signature corresponde exactement à ton item.h !
+Item::Item(std::string itemName, int value, int itemPrice, ItemType itemType) {
+    name = itemName;
+    effectValue = value;
+    price = itemPrice;
+    type = itemType;
 }

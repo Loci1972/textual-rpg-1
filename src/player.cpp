@@ -164,7 +164,8 @@ void Player::saveToJSON(const std::string& filename) {
         for (const auto& item : inventory) {
             json itemJson;
             itemJson["name"] = item.getName();
-            itemJson["healAmount"] = item.healPoints();
+            itemJson["type"] = item.getType();
+            itemJson["effectValue"] = item.getValue();
             inventoryArray.push_back(itemJson);
         }
         playerData["inventory"] = inventoryArray;
@@ -215,11 +216,20 @@ bool Player::loadFromJSON(const std::string& filename) {
             if (playerData.contains("inventory") && playerData["inventory"].is_array()) {
                 for (const auto& itemJson : playerData["inventory"]) {
                     std::string itemName = itemJson["name"];
-                    int healAmount = itemJson["healAmount"];
-                    inventory.emplace_back(itemName, healAmount);
+                    
+                    // 1. On récupère le type sous forme d'entier et on le cast dans ton enum ItemType
+                    ItemType itemType = static_cast<ItemType>(itemJson["type"].get<int>());
+                    
+                    // 2. On lit la bonne clé "effectValue" au lieu de "healAmount"
+                    int effectValue = itemJson["effectValue"];
+                    
+                    // 3. Le prix au chargement (tu peux mettre 0 par défaut ou ajouter le prix dans la sauvegarde)
+                    int defaultPrice = 0; 
+                    
+                    // 4. On crée l'objet avec ton nouveau constructeur adapté
+                    inventory.emplace_back(itemName, effectValue, defaultPrice, itemType);
                 }
             }
-            
             std::cout << "✅ Partie chargée avec succès depuis JSON !\n";
             return true;
         }
@@ -235,14 +245,23 @@ void Player::addItem(Item item) {
 }
 
 void Player::useItem(int index) {
-    if (index >= 1 && (size_t)index <= inventory.size()) {  // ✅ <= au lieu de <
-        Item& it = inventory[index-1];  // ✅ index-1 !
-        heal(it.healPoints());
-        std::cout << "Used " << it.getName() << " - healed " 
-                  << it.healPoints() << " HP\n";
+    if (index >= 1 && (size_t)index <= inventory.size()) {
+        Item& it = inventory[index-1];
+        
+        // On applique l'effet selon le type
+        if (it.getType() == HEAL) {
+            heal(it.getValue());
+            std::cout << "Utilisé " << it.getName() << " - Soigne " << it.getValue() << " PV\n";
+        } 
+        else if (it.getType() == ATTACK) {
+            attack += it.getValue(); // Boost permanent ou temporaire selon ton choix
+            std::cout << "Utilisé " << it.getName() << " - Attaque augmentée de " << it.getValue() << " !\n";
+        }
+        
+        // On retire l'objet de l'inventaire
         inventory.erase(inventory.begin() + (index-1));
     } else {
-        std::cout << "Invalid choice!" << std::endl;
+        std::cout << "Choix invalide !" << std::endl;
     }
 }
 

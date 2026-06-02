@@ -30,7 +30,7 @@ int Game::choices(){
     while (true){
         if (combatState == INMENUE){
             std::cout << " <<<MENUE>>> " << std::endl;
-            std::cout << " 1. fight enemy\n 2. fight wave\n 3. Stats\n 4. Quit\n";
+            std::cout << " 1. fight enemy\n 2. fight wave\n 3. Stats\n 4. Quit\n 5. Shop\n";
             a = getNumber();
             if (a >= 1 && a <= 4) return a;
             menueType = 1;
@@ -83,6 +83,8 @@ bool Game::handleMainMenue(){
             player->heal(player->getMaxHp());
             saveGame();
             return false;
+        case 5:
+            shop();
     }
     return true;
 }
@@ -214,9 +216,72 @@ void Game::stateManager(bool invoked){
 }
 
 void Game::shop(){
-    std::cout << "coming soon..." << std::endl;
-}
+    std::vector<Item> shopItems = {
+        Item("Small heal Potion", 30, 15, HEAL),
+        Item("Big Heal potion", 80, 35, HEAL),
+        Item("Strength potion", 5, 50, ATTACK)
+    };
 
+    bool inShop = true; // Remplace buyed pour gérer la session dans la boutique
+
+    while (inShop) {
+        std::cout << "\n=== Welcome to the shop ===" << std::endl;
+        std::cout << "Your gold: " << player->getGoldAmount() << " PO\n" << std::endl;
+        
+        // Affichage des articles
+        for (size_t i = 0; i < shopItems.size(); i++){
+            std::cout << i + 1 << ". " 
+                      << shopItems[i].getName() 
+                      << " | Effect: +" << shopItems[i].getValue() 
+                      << " | Price: " << shopItems[i].getPrice() << " PO" << std::endl;
+        }
+        std::cout << shopItems.size() + 1 << ". Leave shop" << std::endl;
+        std::cout << "What do you want to buy? : ";
+
+        int index = getNumber();
+
+        // Option pour quitter le shop
+        if (index == (int)shopItems.size() + 1) {
+            std::cout << "Thanks for visiting!" << std::endl;
+            inShop = false; 
+            break;
+        }
+
+        // Si le choix correspond à un objet valide
+        if (index >= 1 && (size_t)index <= shopItems.size()){
+            int itemToBuyIndex = index - 1;
+            Item& selectedItem = shopItems[itemToBuyIndex];
+
+            // 1. Validation de l'or avant confirmation
+            if (player->getGoldAmount() < selectedItem.getPrice()) {
+                std::cout << "You don't have enough gold for this item!" << std::endl;
+                continue; // Revient au début du menu du shop
+            }
+
+            // 2. Menu de confirmation
+            while (true){
+                std::cout << "\nDo you really want to buy " << selectedItem.getName() 
+                          << " for " << selectedItem.getPrice() << " gold?\n1. Yes\n2. No\n? : ";
+                index = getNumber();
+
+                if (index == 1){
+                    // On retire l'or (En envoyant une valeur négative à addGold)
+                    player->addGold(-selectedItem.getPrice());
+                    player->addItem(selectedItem);
+                    std::cout << "Successfully bought " << selectedItem.getName() << "!" << std::endl;
+                    break; // Sort de la boucle de confirmation
+                } else if (index == 2){
+                    std::cout << "Purchase canceled." << std::endl;
+                    break; // Sort de la boucle de confirmation
+                } else {
+                    std::cout << "Invalid input..." << std::endl;
+                }
+            }
+        } else {
+            std::cout << "Invalid choice, please retry." << std::endl;
+        }
+    }
+}
 Enemy Game::generateEnemy(){
     int playerLevel = player->getLevel();
 	constexpr int default_lenght = 6;
@@ -277,17 +342,16 @@ void Game::combatWaves(){
                 isRunning = true;
                 combat(true);
                 
-                // Si ennemi vaincu, le retirer de la liste
-                if (!enemy->isAlive()) {
-                    enemies.erase(enemies.begin() + selectedEnemy);
-                    std::cout << "Enemy defeated! Next...\n";
-                }
-                combatState = INMENUE;
-                menueType = 1;  
+            // Si ennemi vaincu, le retirer de la liste
+            if (!enemy->isAlive()) {
+                enemies.erase(enemies.begin() + selectedEnemy);
+                std::cout << "Enemy defeated! Next...\n";
             }
+            combatState = INMENUE;
+            menueType = 1;  
         }
     }
-    
+}   
     if (enemies.empty()) {
         std::cout << "\n🎉 Wave completed!\n";
         combatState = INMENUE;

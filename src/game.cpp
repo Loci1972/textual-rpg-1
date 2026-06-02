@@ -32,7 +32,7 @@ int Game::choices(){
             std::cout << " <<<MENUE>>> " << std::endl;
             std::cout << " 1. fight enemy\n 2. fight wave\n 3. Stats\n 4. Quit\n 5. Shop\n";
             a = getNumber();
-            if (a >= 1 && a <= 4) return a;
+            if (a >= 1 && a <= 5) return a;
             menueType = 1;
             std::cout << "Invalid choice !!" << std::endl;
         }else if (combatState == RUNNING){

@@ -5,7 +5,7 @@
 #include "player.h"
 #include <array>
 enum gameState{
-    LAUNCHED,
+    INMENUE,
 	RUNNING,
     FLED,
     WON,
@@ -28,6 +28,9 @@ class Game{
 		void loadGame();
 		int choices();
 		bool actions();
+		bool handleMainMenue();
+		bool handleCombatMenue();
+		bool handleEndMenue();
 		void combat(bool invoked);
 		void stateManager(bool invoked);
 		void shop();

@@ -8,7 +8,7 @@
 #include <vector>
 
 Game::Game(Player& p, Enemy& e)
-    : combatState(LAUNCHED), isRunning(true), rewarded(false),
+    : combatState(INMENUE), isRunning(true), rewarded(false),
       playerTurn(true), menueType(1), choice(0), itemChoice(0),
       player(&p), enemy(&e) {
 }
@@ -28,9 +28,9 @@ void Game::loadGame(){
 int Game::choices(){
     int a;
     while (true){
-        if (combatState == LAUNCHED){
+        if (combatState == INMENUE){
             std::cout << " <<<MENUE>>> " << std::endl;
-            std::cout << " 1. fight enemy\n 2. fight wave\n 3. Stats\n 4. Items\n";
+            std::cout << " 1. fight enemy\n 2. fight wave\n 3. Stats\n 4. Quit\n";
             a = getNumber();
             if (a >= 1 && a <= 4) return a;
             menueType = 1;
@@ -44,14 +44,14 @@ int Game::choices(){
             std::cout << "Invalid choice !!" << std::endl;
         }else if (combatState == DEAD){
             std::cout << " <<<You Lose...>>> " << std::endl;
-            std::cout << " 1. Retry\n 2. quit\n 3. Stats\n" ;
+            std::cout << " 1. Retry\n 2. Menue\n 3. Stats\n" ;
             a = getNumber();
             menueType = 3;
             if (a >= 1 && a <= 3) return a;
             std::cout << "Invalid choice !!" << std::endl;
         }else if (combatState == FLED){
             std::cout << " <<<You Ran Away 🐔...>>> " << std::endl;
-            std::cout << " 1. New fight\n 2. quit\n 3. Stats\n" ;
+            std::cout << " 1. New fight\n 2. Menue\n 3. Stats\n" ;
             a = getNumber();
             menueType = 4;
             if (a >= 1 && a <= 3) return a;
@@ -59,7 +59,7 @@ int Game::choices(){
         }
         else {
             std::cout << " <<<YOU WON !!!...>>> " << std::endl;
-            std::cout << " 1. New fight\n 2. quit\n 3. Stats\n" ;
+            std::cout << " 1. New fight\n 2. Menue\n 3. Stats\n" ;
             a = getNumber();
             menueType = 5;
             if (a >= 1 && a <= 3) return a;
@@ -68,66 +68,81 @@ int Game::choices(){
     }
 }
 
+bool Game::handleMainMenue(){
+    switch (choice) {
+        case 1:
+            combatState = RUNNING;
+            break;
+        case 2:
+            combatWaves();
+            break;
+        case 3: // Stats
+            player->displayStats();
+            break;
+        case 4: //quit
+            player->heal(player->getMaxHp());
+            saveGame();
+            return false;
+    }
+    return true;
+}
+
+bool Game::handleEndMenue(){
+    switch (choice) {
+        case 1: // Restart / Continue
+            player->heal(player->getMaxHp());
+            enemy->fullHeal();
+            playerTurn = true;
+            std::cout << "Restarting...\n";
+            break;
+        case 2: // Quit
+		    player->heal(player->getMaxHp());
+            saveGame();
+            return false;
+        case 3: // Stats
+            player->displayStats();
+            break;
+    }
+}
+
+bool Game::handleCombatMenue(){
+    switch (choice) {
+        case 1:// Attack
+            std::cout << "You hit " << enemy->getName() << " with " << enemy->takeDamage(player->getAttack()) << " Damages.\n";
+		    enemy->displayHealthBar();
+            playerTurn = false; 
+            break;
+        case 2: // Run away (souvent géré dans le main, mais au cas où)
+            break;
+        case 3: // Stats
+            player->displayStats();
+            break;
+        case 4: // Items
+            player->showItems();
+            std::cout << "<<ITEMS>> \n 1. Use item\n 2. Cancel\n ? : ";
+            itemChoice = getNumber();
+            if (itemChoice == 1) player->useItem(getNumber());
+            if (itemChoice == 2) std::cout << "canceled" << std::endl;
+            break;
+    }
+    return true;
+}
+
 bool Game::actions (){
-    if (menueType == 1) {
-        switch (choice) {
-            case 1:
-                combatState = RUNNING;
-                break;
-            case 2:
-                combatWaves();
-                break;
-            case 3: // Stats
-                player->displayStats();
-                break;
-            case 4: // Items
-                player->showItems();
-                std::cout << "<<ITEMS>> \n 1. Use item\n 2. Cancel\n ? : ";
-                itemChoice = getNumber();
-                if (itemChoice == 1) player->useItem(getNumber());
-                if (itemChoice == 2) std::cout << "canceled" << std::endl;
-                break;
-            }
-        return true;
-    } else if (menueType == 2) {
-        switch (choice) {
-            case 1:// Attack
-        std::cout << "You hit " << enemy->getName() << " with " << enemy->takeDamage(player->getAttack()) << " Damages.\n";
-		enemy->displayHealthBar();
-                playerTurn = false; 
-                break;
-            case 2: // Run away (souvent géré dans le main, mais au cas où)
-                break;
-            case 3: // Stats
-                player->displayStats();
-                break;
-            case 4: // Items
-                player->showItems();
-                std::cout << "<<ITEMS>> \n 1. Use item\n 2. Cancel\n ? : ";
-                itemChoice = getNumber();
-                if (itemChoice == 1) player->useItem(getNumber());
-                if (itemChoice == 2) std::cout << "canceled" << std::endl;
-                break;
-            }
-        return true;
-    } 
-    // Cas 3, 4 ou 5 : Le combat est fini (Mort, Victoire ou Fuite)
-    else {
-        switch (choice) {
-            case 1: // Restart / Continue
-                player->heal(player->getMaxHp());
-                enemy->fullHeal();
-                playerTurn = true;
-                std::cout << "Restarting...\n";
-                break;
-            case 2: // Quit
-		player->heal(player->getMaxHp());
-                saveGame();
-                return false;
-            case 3: // Stats
-                player->displayStats();
-                break;
-        }
+    switch (menueType){
+        case 1:
+            return handleMainMenue();
+            break;
+        case 2:
+            return handleCombatMenue();
+            break;
+        case 3:
+        case 4:
+        case 5:
+            return handleEndMenue();
+        default:
+            return true;
+            break;
     }
     return true;
 }
@@ -171,7 +186,7 @@ std::cout << enemy->getName() << " deals " << dmg << " damage!\n";
 }
 
 void Game::stateManager(bool invoked){
-    if (combatState != FLED && combatState != LAUNCHED){
+    if (combatState != FLED && combatState != INMENUE){
     // --- 1. SET THE STATE AND MENU TYPE ---
     if (player->isAlive() && enemy->isAlive()){
         menueType = 2; // Combat menu
@@ -241,7 +256,10 @@ void Game::combatWaves(){
         std::cout << "Select an enemy (or 0 to go back): ";
         size_t input = (size_t)getNumber();
         
-        if (input == 0) break; // Quitter la vague
+        if (input == 0){
+            combatState = INMENUE;
+            break;
+        }
         
         if (input >= 1 && input <= enemies.size()){
             selectedEnemy = input - 1;
@@ -261,7 +279,7 @@ void Game::combatWaves(){
                     enemies.erase(enemies.begin() + selectedEnemy);
                     std::cout << "Enemy defeated! Next...\n";
                 }
-                combatState = LAUNCHED;
+                combatState = INMENUE;
                 isRunning = true;  
             }
         }

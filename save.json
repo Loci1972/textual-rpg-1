@@ -1,0 +1,22 @@
+{
+    "character": {
+        "level": 1,
+        "name": "Laurent",
+        "xp": 0,
+        "xpToNextLevel": 100
+    },
+    "inventory": [],
+    "metadata": {
+        "savedAt": "Game Save",
+        "version": "1.0"
+    },
+    "resources": {
+        "gold": 50
+    },
+    "stats": {
+        "attack": 15,
+        "currentHp": 120,
+        "defense": 8,
+        "maxHp": 120
+    }
+}

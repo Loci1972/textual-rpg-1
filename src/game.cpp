@@ -334,21 +334,26 @@ void Game::combatWaves(){
             enemies[selectedEnemy].displayStats();
             std::cout << "Fight this enemy? 1.Yes  2.No\n ? : ";
             input = getNumber();
-            
             if (input == 1){
                 *enemy = enemies[selectedEnemy];
                 combatState = RUNNING;
                 rewarded = false;
                 isRunning = true;
-                combat(true);
-                
-            // Si ennemi vaincu, le retirer de la liste
-            if (!enemy->isAlive()) {
-                enemies.erase(enemies.begin() + selectedEnemy);
-                std::cout << "Enemy defeated! Next...\n";
-            }
-            combatState = INMENUE;
-            menueType = 1;  
+
+                combat(true); // Gère le combat complet
+
+                // On vérifie ce qui s'est passé APRÈS le combat
+                if (!enemy->isAlive()) {
+                    enemies.erase(enemies.begin() + selectedEnemy);
+                    std::cout << "Enemy defeated! Next...\n";
+                    combatState = INMENUE; // On peut revenir au menu de la vague
+                    menueType = 1;
+                } 
+                else if (combatState == FLED) {
+                    // Si le joueur a fui, on le remet calmement dans le menu de la vague
+                    combatState = INMENUE;
+                    menueType = 1;
+                }
         }
     }
 }   

@@ -103,6 +103,7 @@ bool Game::handleEndMenue(){
             player->displayStats();
             break;
     }
+    return true;
 }
 
 bool Game::handleCombatMenue(){

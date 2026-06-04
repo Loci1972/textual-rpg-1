@@ -24,7 +24,7 @@ int getNumber(){
 
 std::string getString(){
     std::string text;
-    while(text != "" || text != " "){
+    while(text != "" && text != " "){
         std::getline(std::cin, text);
         break;
     }
